@@ -8,6 +8,8 @@ from keras import backend as K
 
 import tensorflow as tf
 
+import gym_magic
+
 #----------
 HUBER_LOSS_DELTA = 1.0
 LEARNING_RATE = 0.00025
@@ -119,11 +121,11 @@ class Agent:
             self.brain.updateTargetModel()
 
         # debug the Q function in poin S
-        if self.steps % 100 == 0:
-            S = numpy.array([-0.01335408, -0.04600273, -0.00677248, 0.01517507])
-            pred = agent.brain.predictOne(S)
-            print(pred[0])
-            sys.stdout.flush()
+#        if self.steps % 100 == 0:
+#            S = numpy.array([-0.01335408, -0.04600273, -0.00677248, 0.01517507])
+#            pred = agent.brain.predictOne(S)
+#            print(pred[0])
+#            sys.stdout.flush()
 
         # slowly decrease Epsilon based on our eperience
         self.steps += 1
@@ -204,10 +206,10 @@ class Environment:
             if done:
                 break
 
-        # print("Total reward:", R)
+        print("Total reward:", R)
 
 #-------------------- MAIN ----------------------------
-PROBLEM = 'CartPole-v0'
+PROBLEM = 'MagicSquare3x3P1-v0'
 env = Environment(PROBLEM)
 
 stateCnt  = env.env.observation_space.shape[0]
@@ -226,4 +228,4 @@ try:
     while True:
         env.run(agent)
 finally:
-    agent.brain.model.save("cartpole-dqn.h5")
+    agent.brain.model.save(PROBLEM + "-dqn.h5")
