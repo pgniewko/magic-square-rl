@@ -16,9 +16,9 @@ pip install -e .
 
 ```
 import gym
-import gym_banana
+import gym_magic
 
-env = gym.make('Banana-v0')
+env = gym.make('MagicSquare3x3P1-v0')
 ```
 
 See https://github.com/matthiasplappert/keras-rl/tree/master/examples for some
@@ -26,12 +26,15 @@ examples.
 
 
 ## The Environment
+Describe the Env here
 
-Imagine you are selling bananas. One at a time. And the bananas get bad pretty
-quickly. Let's say in 3 days. The probability that I will sell the banana
-is given by
-
-$$p(x) = (1+e)/(1. + e^(x+1))$$
-
-where x-1 is my profit. This x-1 is my reward. If I don't sell the
-banana, the agent gets a reward of -1 (the price of the banana).
+## TODO
+1. Constant Seed
+2. setup.py correction and installation instruction
+3. Finishup this file; add resources
+4. Be able to choose what Brain model we want to use
+5. Printout Magic Square
+6. Keras on GPU, i.e. if there is GPU run on it
+7. Printout training method
+8. Implement game-play
+9. Implement new actions: swaps
