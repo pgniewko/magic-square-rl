@@ -12,7 +12,7 @@ import gym_magic
 
 #----------
 HUBER_LOSS_DELTA = 1.0
-LEARNING_RATE = 0.00025
+#LEARNING_RATE = 0.00025
 
 #----------
 def huber_loss(y_true, y_pred):
@@ -35,18 +35,28 @@ class Brain:
     def __init__(self, stateCnt, actionCnt):
         self.stateCnt = stateCnt
         self.actionCnt = actionCnt
+        self.hidden_size = 100
+        self.LEARNING_RATE = 0.00025
+        self.LEARNING_RATE = 0.2
 
         self.model = self._createModel()
         self.model_ = self._createModel() 
 
+
+
     def _createModel(self):
         model = Sequential()
+        model.add( Dense( units=self.hidden_size, activation='relu', input_dim=self.stateCnt ) )
+        model.add( Dense( units=self.hidden_size, activation='relu' ) )
+        model.add( Dense( units=self.actionCnt,   activation='linear' ) )
+        #model.compile( sgd(lr=.2), "mse" )
+        model.compile( loss='mse', optimizer='adam' )
 
-        model.add(Dense(units=64, activation='relu', input_dim=stateCnt))
-        model.add(Dense(units=actionCnt, activation='linear'))
-
-        opt = RMSprop(lr=LEARNING_RATE)
-        model.compile(loss=huber_loss, optimizer=opt)
+#        model = Sequential()
+#        model.add(Dense(units=64, activation='relu', input_dim=stateCnt))
+#        model.add(Dense(units=actionCnt, activation='linear'))
+#        opt = RMSprop(lr=LEARNING_RATE)
+#        model.compile(loss=huber_loss, optimizer=opt)
 
         return model
 
