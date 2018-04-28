@@ -7,6 +7,7 @@ import random
 import numpy as np
 import math
 import sys
+import os
 
 from keras import backend as K
 import tensorflow as tf
@@ -20,24 +21,33 @@ from keras.layers import *
 from keras.optimizers import *
 
 class Brain:
+    """
+    """
+
     def __init__(self, stateCnt, actionCnt):
         self.stateCnt = stateCnt
         self.actionCnt = actionCnt
-        self.hidden_size = 100
+        self.hidden_size = 50
         self.LEARNING_RATE = 0.1
 
-        self.model = self._createModel()
-        self.model_ = self._createModel() 
+        self.model = self._createModel_no1()
+        self.model_ = self._createModel_no1() 
+
+        print( self.model.summary() )
 
 
-
-    def _createModel(self):
+    def _createModel_no1(self):
         model = Sequential()
-        model.add( Dense( units=self.hidden_size, activation='relu', input_dim=self.stateCnt ) )
-        model.add( Dense( units=self.hidden_size, activation='relu' ) )
-        model.add( Dense( units=self.actionCnt,   activation='linear' ) )
+        model.add( Dense( units=self.hidden_size,   activation='relu', input_dim=self.stateCnt ) )
+        model.add( Dense( units=2*self.hidden_size, activation='relu' ) )
+        model.add( Dense( units=self.hidden_size,   activation='relu' ) )
+        model.add( Dense( units=self.actionCnt,     activation='linear' ) )
         model.compile( loss='mse', optimizer='adam' )
         return model
+
+
+    def _createModel_no2(self):
+        return None
 
 
     def train(self, x, y, epochs=1, verbose=0):
@@ -205,6 +215,11 @@ actionCnt = env.env.action_space.n
 agent = Agent(stateCnt, actionCnt)
 randomAgent = RandomAgent(actionCnt)
 
+dir_out = './model/'
+
+if not os.path.exists( dir_out ):
+    os.makedirs( dir_out )
+
 try:
     while randomAgent.memory.isFull() == False:
         env.run(randomAgent)
@@ -214,5 +229,6 @@ try:
 
     while True:
         env.run(agent)
+        agent.brain.model.save(dir_out+PROBLEM + "-dqn.h5")
 finally:
-    agent.brain.model.save(PROBLEM + "-dqn.h5")
+    agent.brain.model.save(dir_out+PROBLEM + "-dqn.h5")
