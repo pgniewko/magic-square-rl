@@ -30,8 +30,8 @@ class Brain:
         self.hidden_size = 50
         self.LEARNING_RATE = 0.1
 
-        self.model = self._createModel_no1()
-        self.model_ = self._createModel_no1() 
+        self.model  = self._createModel_no2()
+        self.model_ = self._createModel_no2() 
 
         print( self.model.summary() )
 
@@ -47,7 +47,15 @@ class Brain:
 
 
     def _createModel_no2(self):
-        return None
+        model = Sequential()
+        model.add( Dense( units=self.hidden_size,   activation='relu', input_dim=self.stateCnt ) )
+        model.add( Dense( units=self.hidden_size,   activation='relu' ) )
+        model.add( Dense( units=self.hidden_size,   activation='elu' ) )
+        model.add( Dense( units=self.hidden_size,   activation='selu' ) )
+        model.add( Dense( units=self.hidden_size,   activation='relu' ) )
+        model.add( Dense( units=self.actionCnt,     activation='linear' ) )
+        model.compile( loss='mse', optimizer='adam' )
+        return model
 
 
     def train(self, x, y, epochs=1, verbose=0):
@@ -206,6 +214,10 @@ class Environment:
         print("Total reward:", R)
 
 #-------------------- MAIN ----------------------------
+# Ensure we always get the same amount of randomness
+# For tests only
+np.random.seed(123)
+
 PROBLEM = 'MagicSquare3x3P1-v0'
 env = Environment(PROBLEM)
 
