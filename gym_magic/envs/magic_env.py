@@ -38,7 +38,7 @@ class MagicSquareEnv(gym.Env):
         self.reward_range = (0, self.BASE_**(2*self.DIM+2))
         
         # Simulation related variables.
-        self.seed(seed)
+        self.seed(seed_)
         self.reset()
  
 
@@ -114,6 +114,7 @@ class MagicSquareEnv(gym.Env):
 
 
     def seed(self, seed=None):
+#        np.random.seed(123)
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
     

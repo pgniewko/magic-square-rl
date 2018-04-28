@@ -30,13 +30,13 @@ class Brain:
         self.hidden_size = 50
         self.LEARNING_RATE = 0.1
 
-        self.model  = self._createModel_no2()
-        self.model_ = self._createModel_no2() 
+        self.model  = self._model_no_2()
+        self.model_ = self._model_no_2()
 
         print( self.model.summary() )
 
 
-    def _createModel_no1(self):
+    def _model_no_1(self):
         model = Sequential()
         model.add( Dense( units=self.hidden_size,   activation='relu', input_dim=self.stateCnt ) )
         model.add( Dense( units=2*self.hidden_size, activation='relu' ) )
@@ -46,7 +46,7 @@ class Brain:
         return model
 
 
-    def _createModel_no2(self):
+    def _model_no_2(self):
         model = Sequential()
         model.add( Dense( units=self.hidden_size,   activation='relu', input_dim=self.stateCnt ) )
         model.add( Dense( units=self.hidden_size,   activation='relu' ) )
