@@ -17,8 +17,12 @@ from gym.utils import seeding
 
 
 class MagicSquareEnv(gym.Env):
+    metadata = {'render.modes': ['human']}
 
-    def __init__(self, DIM_=3, POW_=1, seed=None):
+    def __init__(self, DIM_=3, POW_=1, seed_=None):
+        # SET SEED FIXED
+        seed_=123
+
         self.BASE_=2
    
         # General variables defining the environment
@@ -125,27 +129,27 @@ class MagicSquareEnv(gym.Env):
 class MagicSquare3x3P1(MagicSquareEnv):
     """
     """
-    def __init__(self):
+    def __init__(self,seed_=None):
         self.__version__ = "0.1"
         print("MagicSqaure3x3P1 - Version {}".format(self.__version__))
-        super(MagicSquare3x3P1, self).__init__(DIM_=3,POW_=1)
+        super(MagicSquare3x3P1, self).__init__(DIM_=3,POW_=1,seed_=seed_)
 
 
 class MagicSquare6x6P1(MagicSquareEnv):
     """
     """
-    def __init__(self):
+    def __init__(self, seed_=None):
         self.__version__ = "0.1"
         print("MagicSqaure6x6P1 - Version {}".format(self.__version__))
-        super(MagicSquare6x6P1, self).__init__(DIM_=6,POW_=1)
+        super(MagicSquare6x6P1, self).__init__(DIM_=6,POW_=1,seed_=seed_)
 
 
 class MagicSquare6x6P3(MagicSquareEnv):
     """
     """
-    def __init__(self):
+    def __init__(self,seed_=None):
         self.__version__ = "0.1"
         print("MagicSqaure6x6P3 - Version {}".format(self.__version__))
-        super(MagicSquare6x6P3, self).__init__(DIM_=6,POW_=3)
+        super(MagicSquare6x6P3, self).__init__(DIM_=6,POW_=3,seed_=seed_)
 
 
