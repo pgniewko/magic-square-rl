@@ -18,7 +18,8 @@ from gym.utils import seeding
 
 class MagicSquareEnv(gym.Env):
 
-    def __init__(self, DIM_=3, POW_=1):
+    def __init__(self, DIM_=3, POW_=1, seed=None):
+        self.BASE_=2
    
         # General variables defining the environment
         self.DIM = DIM_
@@ -28,29 +29,41 @@ class MagicSquareEnv(gym.Env):
         self.state = None
         self.is_square_solved=False
         self.curr_step = -1 
-
-
+   
+        
+        self.reward_range = (0, self.BASE_**(2*self.DIM+2))
+        
         # Simulation related variables.
-        self.seed()
+        self.seed(seed)
         self.reset()
  
-       # Just need to initialize the relevant attributes
+
+    def reset(self):
+        self.state = np.arange( 1, self.DIM*self.DIM+1, 1, dtype=int)
+        np.random.shuffle( self.state )
+        return self.state
 
 
     def step(self, action):
+        assert self.action_space.contains(action)
+        
         if self.is_square_solved:
+            self._print_ms()
             raise RuntimeError("Episode is done")
 
         self.curr_step += 1
         new_state = self._take_action(action)
         reward = self._get_reward()
         info_ = {}
-        self.is_square_solved = reward == 2**(2*self.DIM+2)
+        self.is_square_solved = reward == self.reward_range[1]
+
         if self.is_square_solved:
-            pass
-            # print out a magic square
+            self._print_ms()
+            raise RuntimeError("Episode is done")
+
 
         return new_state, reward, self.is_square_solved, info_
+
 
     def _take_action(self, action):
         if action < self.DIM*self.DIM:
@@ -61,6 +74,7 @@ class MagicSquareEnv(gym.Env):
                 
             
         return self.state
+
 
     def _get_reward(self):
         if 0 in self.state:
@@ -77,31 +91,35 @@ class MagicSquareEnv(gym.Env):
       
         sums_ = np.append(np.append( row_sums, column_sums), diagonal_sums  )
         reward = self._calc_reward_score(sums_)
-        #if reward > 2:
-        #    print reward, ms_, sums_
+        
         return reward
+
+
+    def _get_space_size(self):
+        return self.DIM*self.DIM
 
 
     def _calc_reward_score(self, sums_):
         uniqs_, counts_ = np.unique(sums_,return_counts=True)
-        reward = 2**( counts_.max() )
+        reward = self.BASE_**( counts_.max() )
         return reward
 
 
-    def reset(self):
-        #self.state = np.random.randint(1,self.DIM*self.DIM, size=self.DIM*self.DIM)
-        self.state = np.arange( 1, self.DIM*self.DIM+1, 1, dtype=int)
-        np.random.shuffle( self.state )
-        return self.state
-
-
-    def render(self, mode='human', close=False):
+    def _print_ms(self):
         return
 
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
+    
+    
+    def render(self, mode='human', close=False):
+        return
+
+    
+    def close(self):
+        return
 
 
 class MagicSquare3x3P1(MagicSquareEnv):
