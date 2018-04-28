@@ -3,28 +3,16 @@
 #
 # author: Pawel Gniewek, 2018
 
-import random, numpy, math, gym, sys
-from keras import backend as K
+import random
+import numpy as np
+import math
+import sys
 
+from keras import backend as K
 import tensorflow as tf
 
+import gym
 import gym_magic
-
-#----------
-HUBER_LOSS_DELTA = 1.0
-#LEARNING_RATE = 0.00025
-
-#----------
-def huber_loss(y_true, y_pred):
-    err = y_true - y_pred
-
-    cond = K.abs(err) < HUBER_LOSS_DELTA
-    L2 = 0.5 * K.square(err)
-    L1 = HUBER_LOSS_DELTA * (K.abs(err) - 0.5 * HUBER_LOSS_DELTA)
-
-    loss = tf.where(cond, L2, L1)   # Keras does not cover where function in tensorflow :-(
-
-    return K.mean(loss)
 
 #-------------------- BRAIN ---------------------------
 from keras.models import Sequential
@@ -36,8 +24,7 @@ class Brain:
         self.stateCnt = stateCnt
         self.actionCnt = actionCnt
         self.hidden_size = 100
-        self.LEARNING_RATE = 0.00025
-        self.LEARNING_RATE = 0.2
+        self.LEARNING_RATE = 0.1
 
         self.model = self._createModel()
         self.model_ = self._createModel() 
@@ -49,19 +36,13 @@ class Brain:
         model.add( Dense( units=self.hidden_size, activation='relu', input_dim=self.stateCnt ) )
         model.add( Dense( units=self.hidden_size, activation='relu' ) )
         model.add( Dense( units=self.actionCnt,   activation='linear' ) )
-        #model.compile( sgd(lr=.2), "mse" )
         model.compile( loss='mse', optimizer='adam' )
-
-#        model = Sequential()
-#        model.add(Dense(units=64, activation='relu', input_dim=stateCnt))
-#        model.add(Dense(units=actionCnt, activation='linear'))
-#        opt = RMSprop(lr=LEARNING_RATE)
-#        model.compile(loss=huber_loss, optimizer=opt)
-
         return model
+
 
     def train(self, x, y, epochs=1, verbose=0):
         self.model.fit(x, y, batch_size=64, epochs=epochs, verbose=verbose)
+
 
     def predict(self, s, target=False):
         if target:
@@ -69,8 +50,10 @@ class Brain:
         else:
             return self.model.predict(s)
 
+
     def predictOne(self, s, target=False):
         return self.predict(s.reshape(1, self.stateCnt), target=target).flatten()
+
 
     def updateTargetModel(self):
         self.model_.set_weights(self.model.get_weights())
@@ -122,7 +105,7 @@ class Agent:
         if random.random() < self.epsilon:
             return random.randint(0, self.actionCnt-1)
         else:
-            return numpy.argmax(self.brain.predictOne(s))
+            return np.argmax(self.brain.predictOne(s))
 
     def observe(self, sample):  # in (s, a, r, s_) format
         self.memory.add(sample)        
@@ -130,12 +113,6 @@ class Agent:
         if self.steps % UPDATE_TARGET_FREQUENCY == 0:
             self.brain.updateTargetModel()
 
-        # debug the Q function in poin S
-#        if self.steps % 100 == 0:
-#            S = numpy.array([-0.01335408, -0.04600273, -0.00677248, 0.01517507])
-#            pred = agent.brain.predictOne(S)
-#            print(pred[0])
-#            sys.stdout.flush()
 
         # slowly decrease Epsilon based on our eperience
         self.steps += 1
@@ -145,16 +122,16 @@ class Agent:
         batch = self.memory.sample(BATCH_SIZE)
         batchLen = len(batch)
 
-        no_state = numpy.zeros(self.stateCnt)
+        no_state = np.zeros(self.stateCnt)
 
-        states = numpy.array([ o[0] for o in batch ])
-        states_ = numpy.array([ (no_state if o[3] is None else o[3]) for o in batch ])
+        states = np.array([ o[0] for o in batch ])
+        states_ = np.array([ (no_state if o[3] is None else o[3]) for o in batch ])
 
         p = self.brain.predict(states)
         p_ = self.brain.predict(states_, target=True)
 
-        x = numpy.zeros((batchLen, self.stateCnt))
-        y = numpy.zeros((batchLen, self.actionCnt))
+        x = np.zeros((batchLen, self.stateCnt))
+        y = np.zeros((batchLen, self.actionCnt))
         
         for i in range(batchLen):
             o = batch[i]
@@ -164,7 +141,7 @@ class Agent:
             if s_ is None:
                 t[a] = r
             else:
-                t[a] = r + GAMMA * numpy.amax(p_[i])
+                t[a] = r + GAMMA * np.amax(p_[i])
 
             x[i] = s
             y[i] = t
