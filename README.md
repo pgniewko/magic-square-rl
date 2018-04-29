@@ -25,6 +25,17 @@ See https://github.com/matthiasplappert/keras-rl/tree/master/examples for some
 examples.
 
 
+### Train
+```bash
+python train-enigma-DQN.py
+```
+
+### Test
+1) Generate figures
+```bash
+python play-enigma.py
+```
+
 ## The Environment
 Describe the Env here
 
@@ -36,5 +47,4 @@ Describe the Env here
 5. Printout Magic Square
 6. Keras on GPU, i.e. if there is GPU run on it
 7. Printout training method
-8. Implement game-play
-9. Implement new actions: swaps
+8. Implement new actions: swaps
