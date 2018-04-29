@@ -42,7 +42,7 @@ class Brain:
         model.add( Dense( units=2*self.hidden_size, activation='relu' ) )
         model.add( Dense( units=self.hidden_size,   activation='relu' ) )
         model.add( Dense( units=self.actionCnt,     activation='linear' ) )
-        model.compile( loss='mse', optimizer='adam' )
+        model.compile( loss='mse', optimizer='adam', metrics=['mae'] )
         return model
 
 
@@ -54,7 +54,7 @@ class Brain:
         model.add( Dense( units=self.hidden_size,   activation='selu' ) )
         model.add( Dense( units=self.hidden_size,   activation='relu' ) )
         model.add( Dense( units=self.actionCnt,     activation='linear' ) )
-        model.compile( loss='mse', optimizer='adam' )
+        model.compile( loss='mse', optimizer='adam' , metrics=['mae'])
         return model
 
 
