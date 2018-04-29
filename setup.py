@@ -8,5 +8,7 @@ setup(name='{}-{}'.format(USERNAME, 'gym-magic-square'),
     author='Pawel Gniewek',
     author_email='gniewko.pablo@gmail.com',
     license='MIT License',
-    install_requires=['gym>=0.2.3', 'numpy']
+    install_requires=['gym>=0.2.3', 'numpy'],
+    scripts=[],
+    zip_safe=False
 )
