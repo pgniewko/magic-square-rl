@@ -17,18 +17,37 @@ from gym.utils import seeding
 
 
 class MagicSquareEnv(gym.Env):
+    EXTRA_ACTIONS_FLAG = True
+    TEST = True
     metadata = {'render.modes': ['human']}
 
     def __init__(self, DIM_=3, POW_=1, seed_=None):
         # SET SEED FIXED
         seed_=123
-
         self.BASE_=2
    
         # General variables defining the environment
         self.DIM = DIM_
         self.POW = POW_
-        self.action_space = spaces.Discrete(2*self.DIM*self.DIM)
+        self.swaps = []
+
+        if self.EXTRA_ACTIONS_FLAG:
+            extra_step = 0
+            for i in range(self.DIM):
+                for j in range(self.DIM):
+                    first_ = i*self.DIM+j
+                    for m in range(self.DIM):
+                        for n in range(self.DIM):
+                            second_ = m*self.DIM+n
+                            if first_ > second_:
+                                self.swaps.append( (first_,second_) )
+                                extra_step += 1
+                    
+            self.action_space = spaces.Discrete(2*self.DIM*self.DIM+extra_step)
+                
+        else:
+            self.action_space = spaces.Discrete(2*self.DIM*self.DIM)
+        
         self.observation_space = np.ones(self.DIM*self.DIM)
         self.state = None
         self.is_square_solved=False
@@ -43,8 +62,11 @@ class MagicSquareEnv(gym.Env):
  
 
     def reset(self):
-        self.state = np.arange( 1, self.DIM*self.DIM+1, 1, dtype=int)
-        np.random.shuffle( self.state )
+        if self.TEST and self.DIM == 3:
+            self.state = np.array( [7,2,6,5,9,1,3,4,8] )
+        else:
+            self.state = np.arange( 1, self.DIM*self.DIM+1, 1, dtype=int)
+            np.random.shuffle( self.state )
         return self.state
 
 
@@ -72,10 +94,15 @@ class MagicSquareEnv(gym.Env):
     def _take_action(self, action):
         if action < self.DIM*self.DIM:
             self.state[action] += 1
-        else:
+        elif action < 2*self.DIM*self.DIM:
             if self.state[action - self.DIM*self.DIM] > 1:
                 self.state[action - self.DIM*self.DIM] -= 1
-                
+        else:
+            swap_no = action - 2*self.DIM*self.DIM
+            f_,s_ = self.swaps[swap_no]
+            f_val = self.state[f_]
+            self.state[f_] = self.state[s_]
+            self.state[s_] = f_val
             
         return self.state
 
