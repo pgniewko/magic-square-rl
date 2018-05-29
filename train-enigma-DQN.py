@@ -217,7 +217,7 @@ class Environment:
 # For tests only
 np.random.seed(123)
 
-PROBLEM = 'MagicSquare3x3P1-v0'
+PROBLEM = 'MagicSquare3x3N3-v0'
 env = Environment(PROBLEM)
 
 stateCnt  = env.env.observation_space.shape[0]

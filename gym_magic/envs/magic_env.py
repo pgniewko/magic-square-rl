@@ -17,56 +17,43 @@ from gym.utils import seeding
 
 
 class MagicSquareEnv(gym.Env):
-    EXTRA_ACTIONS_FLAG = True
-    TEST = True
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, DIM_=3, POW_=1, seed_=None):
+    def __init__(self, DIM_=3, seed_=None):
         # SET SEED FIXED
         seed_=123
-        self.BASE_=2
-   
+  
+        self. M = DIM_*(DIM_*DIM_+1)/2
         # General variables defining the environment
         self.DIM = DIM_
-        self.POW = POW_
         self.swaps = []
 
-        if self.EXTRA_ACTIONS_FLAG:
-            extra_step = 0
-            for i in range(self.DIM):
-                for j in range(self.DIM):
-                    first_ = i*self.DIM+j
-                    for m in range(self.DIM):
-                        for n in range(self.DIM):
-                            second_ = m*self.DIM+n
-                            if first_ > second_:
-                                self.swaps.append( (first_,second_) )
-                                extra_step += 1
+        extra_step = 0
+        for i in range(self.DIM):
+            for j in range(self.DIM):
+                first_ = i*self.DIM+j
+                for m in range(self.DIM):
+                    for n in range(self.DIM):
+                        second_ = m*self.DIM+n
+                        if first_ > second_:
+                            self.swaps.append( (first_,second_) )
+                            extra_step += 1
                     
-            self.action_space = spaces.Discrete(2*self.DIM*self.DIM+extra_step)
+        self.action_space = spaces.Discrete( extra_step )
                 
-        else:
-            self.action_space = spaces.Discrete(2*self.DIM*self.DIM)
-        
         self.observation_space = np.ones(self.DIM*self.DIM)
         self.state = None
         self.is_square_solved=False
         self.curr_step = -1 
    
-        
-        self.reward_range = (0, self.BASE_**(2*self.DIM+2))
-        
         # Simulation related variables.
         self.seed(seed_)
         self.reset()
  
 
     def reset(self):
-        if self.TEST and self.DIM == 3:
-            self.state = np.array( [7,2,6,5,9,1,3,4,8] )
-        else:
-            self.state = np.arange( 1, self.DIM*self.DIM+1, 1, dtype=int)
-            np.random.shuffle( self.state )
+        self.state = np.arange( 1, self.DIM*self.DIM+1, 1, dtype=int)
+        np.random.shuffle( self.state )
         return self.state
 
 
@@ -81,7 +68,7 @@ class MagicSquareEnv(gym.Env):
         new_state = self._take_action(action)
         reward = self._get_reward()
         info_ = {}
-        self.is_square_solved = reward == self.reward_range[1]
+        self.is_square_solved = reward == 0
 
         if self.is_square_solved:
             self._print_ms()
@@ -92,37 +79,28 @@ class MagicSquareEnv(gym.Env):
 
 
     def _take_action(self, action):
-        if action < self.DIM*self.DIM:
-            self.state[action] += 1
-        elif action < 2*self.DIM*self.DIM:
-            if self.state[action - self.DIM*self.DIM] > 1:
-                self.state[action - self.DIM*self.DIM] -= 1
-        else:
-            swap_no = action - 2*self.DIM*self.DIM
-            f_,s_ = self.swaps[swap_no]
-            f_val = self.state[f_]
-            self.state[f_] = self.state[s_]
-            self.state[s_] = f_val
+        f_, s_ = self.swaps[ action ]
+        f_val = self.state[f_]
+        self.state[f_] = self.state[s_]
+        self.state[s_] = f_val
             
         return self.state
 
 
     def _get_reward(self):
-        if 0 in self.state:
-            return 0.0
-        u_, c_ = np.unique(self.state,return_counts=True)
-        if c_.max() > 1:
-            return 0.0
+#        if 0 in self.state:
+#            return 0.0
+#        u_, c_ = np.unique(self.state,return_counts=True)
+#        if c_.max() > 1:
+#            return 0.0
 
-        pow_numbers = np.power(self.state,self.POW)
-        ms_ = pow_numbers.reshape( (self.DIM,self.DIM) )
+        ms_ = self.state.reshape( (self.DIM,self.DIM) )
         row_sums =  np.sum(ms_,axis=1)
         column_sums = np.sum(ms_,axis=0)
         diagonal_sums = np.array( [np.trace(ms_), np.trace(np.flip(ms_,1)) ] )
       
         sums_ = np.append(np.append( row_sums, column_sums), diagonal_sums  )
         reward = self._calc_reward_score(sums_)
-        
         return reward
 
 
@@ -131,12 +109,15 @@ class MagicSquareEnv(gym.Env):
 
 
     def _calc_reward_score(self, sums_):
-        uniqs_, counts_ = np.unique(sums_,return_counts=True)
-        reward = self.BASE_**( counts_.max() )
+        arr_ = sums_ - self.M
+        reward = np.sum( arr_**2 )
+        reward *= -1 
+
         return reward
 
 
     def _print_ms(self):
+        print self.state
         return
 
 
@@ -154,30 +135,12 @@ class MagicSquareEnv(gym.Env):
         return
 
 
-class MagicSquare3x3P1(MagicSquareEnv):
+class MagicSquare3x3N3(MagicSquareEnv):
     """
     """
     def __init__(self,seed_=None):
         self.__version__ = "0.1"
-        print("MagicSqaure3x3P1 - Version {}".format(self.__version__))
-        super(MagicSquare3x3P1, self).__init__(DIM_=3,POW_=1,seed_=seed_)
-
-
-class MagicSquare6x6P1(MagicSquareEnv):
-    """
-    """
-    def __init__(self, seed_=None):
-        self.__version__ = "0.1"
-        print("MagicSqaure6x6P1 - Version {}".format(self.__version__))
-        super(MagicSquare6x6P1, self).__init__(DIM_=6,POW_=1,seed_=seed_)
-
-
-class MagicSquare6x6P3(MagicSquareEnv):
-    """
-    """
-    def __init__(self,seed_=None):
-        self.__version__ = "0.1"
-        print("MagicSqaure6x6P3 - Version {}".format(self.__version__))
-        super(MagicSquare6x6P3, self).__init__(DIM_=6,POW_=3,seed_=seed_)
+        print("MagicSqaure3x3N3 - Version {}".format(self.__version__))
+        super(MagicSquare3x3N3, self).__init__(DIM_=3,seed_=seed_)
 
 
