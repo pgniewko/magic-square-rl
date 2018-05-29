@@ -40,11 +40,9 @@ python play-enigma.py
 Describe the Env here
 
 ## TODO
-1. Constant Seed
-2. setup.py correction and installation instruction
-3. Finishup this file; add resources
-4. Be able to choose what Brain model we want to use
+1. Add CNN-2D for the brain 
+2. Constant Seed
+3. setup.py correction and installation instruction
+4. Finishup this file; add resources
 5. Printout Magic Square
-6. Keras on GPU, i.e. if there is GPU run on it
-7. Printout training method
-8. Implement new actions: swaps
+6. Printout training method
