@@ -12,6 +12,11 @@ Then install this package via
 pip install -e .
 ```
 
+
+## REQUIRED LIBRARIES ##
+* tabulate: `pip install tabulate`
+
+
 ## Usage
 
 ```

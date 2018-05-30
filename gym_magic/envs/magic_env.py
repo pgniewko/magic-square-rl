@@ -117,7 +117,38 @@ class MagicSquareEnv(gym.Env):
 
 
     def _print_ms(self):
-        print self.state
+        from tabulate import tabulate
+       
+        ms_ = self.state.reshape( (self.DIM,self.DIM) )
+        row_sums =  np.sum(ms_,axis=1)
+        column_sums = np.sum(ms_,axis=0)
+        diagonal_sums = np.array( [np.trace(ms_), np.trace(np.flip(ms_,1)) ] )
+        sums_ = np.append(np.append( row_sums, column_sums), diagonal_sums  )
+        
+        ms_ext = []
+        for i in range(self.DIM+2):
+            row = []
+            for j in range(self.DIM+1):
+                row.append( '' )
+
+            ms_ext.append(row)
+        
+        for i in range(self.DIM):
+            for j in range(self.DIM):
+                ms_ext[i+1][j] = ms_[i][j]
+        
+        for i in range(self.DIM):
+            ms_ext[i+1][self.DIM] = row_sums[i]
+        
+        for i in range(self.DIM):
+            ms_ext[self.DIM+1][i] = row_sums[i]
+
+        ms_ext[0][self.DIM] = diagonal_sums[1]
+        ms_ext[self.DIM+1][self.DIM] = diagonal_sums[0]
+        table = tabulate(ms_ext, tablefmt="fancy_grid")
+        print(table)
+
+        #print('\n'.join([''.join(['{:4}'.format(item) for item in row]) for row in ms_]))
         return
 
 
