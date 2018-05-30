@@ -135,12 +135,30 @@ class MagicSquareEnv(gym.Env):
         return
 
 
-class MagicSquare3x3N3(MagicSquareEnv):
+class MagicSquare3x3(MagicSquareEnv):
     """
     """
     def __init__(self,seed_=None):
         self.__version__ = "0.1"
-        print("MagicSqaure3x3N3 - Version {}".format(self.__version__))
-        super(MagicSquare3x3N3, self).__init__(DIM_=3,seed_=seed_)
+        print("MagicSqaure3x3 - Version {}".format(self.__version__))
+        super(MagicSquare3x3, self).__init__(DIM_=3,seed_=seed_)
+
+
+class MagicSquare5x5(MagicSquareEnv):
+    """
+    """
+    def __init__(self,seed_=None):
+        self.__version__ = "0.1"
+        print("MagicSqaure5x5 - Version {}".format(self.__version__))
+        super(MagicSquare5x5, self).__init__(DIM_=5,seed_=seed_)
+
+
+class MagicSquare10x10(MagicSquareEnv):
+    """
+    """
+    def __init__(self,seed_=None):
+        self.__version__ = "0.1"
+        print("MagicSqaure10x10 - Version {}".format(self.__version__))
+        super(MagicSquare10x10, self).__init__(DIM_=10,seed_=seed_)
 
 
