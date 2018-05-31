@@ -19,15 +19,12 @@ pip install -e .
 
 ## Usage
 
-```
+```python
 import gym
 import gym_magic
 
-env = gym.make('MagicSquare3x3P1-v0')
+env = gym.make('MagicSquare3x3-v0')
 ```
-
-See https://github.com/matthiasplappert/keras-rl/tree/master/examples for some
-examples.
 
 
 ### Train
@@ -42,12 +39,15 @@ python play-enigma.py
 ```
 
 ## The Environment
-Describe the Env here
+...
+
+## REFERENCES
+===============
+1. "Human-level control through deep reinforcement learning", Nature 518 (7540), 529-533
+2. "Playing Atari with Deep Reinforcement Learning", arXiv preprint arXiv:1312.5602
 
 ## TODO
 1. Add CNN-2D for the brain 
 2. Constant Seed
 3. setup.py correction and installation instruction
-4. Finishup this file; add resources
-5. Printout Magic Square
-6. Printout training method
+4. https://github.com/matthiasplappert/keras-rl/tree/master/examples
