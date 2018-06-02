@@ -44,10 +44,9 @@ python play-enigma.py
 ## REFERENCES
 1. "Human-level control through deep reinforcement learning", Nature 518 (7540), 529-533
 2. "Playing Atari with Deep Reinforcement Learning", arXiv preprint arXiv:1312.5602
+3. Blog: ...
 
 ## TODO
-1. Add CNN-2D for the brain
-2. Remember last 4 moves
-3. setup.py correction and installation instruction
-4. https://github.com/matthiasplappert/keras-rl/tree/master/examples
-5. actions shold be - switch rows, switch columns
+1. Fix bugs 
+2. Fix brain
+3. https://github.com/matthiasplappert/keras-rl/tree/master/examples
