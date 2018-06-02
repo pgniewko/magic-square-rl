@@ -17,6 +17,7 @@ import gym_magic
 
 #-------------------- BRAIN ---------------------------
 from keras.models import Sequential
+from keras.layers import Dense, Activation, Flatten, Convolution2D
 from keras.layers import *
 from keras.optimizers import *
 
@@ -24,36 +25,32 @@ class Brain:
     """
     """
 
-    def __init__(self, stateCnt, actionCnt):
+    def __init__(self, stateCnt, actionCnt, dim):
         self.stateCnt = stateCnt
         self.actionCnt = actionCnt
         self.hidden_size = 100
         self.LEARNING_RATE = 0.1
 
-        self.model  = self._model_no_2()
-        self.model_ = self._model_no_2()
+        self.model  = self._cnn_2d(dim)
+        self.model_ = self._cnn_2d(dim)
 
         print( self.model.summary() )
 
-
-    def _model_no_1(self):
-        model = Sequential()
-        model.add( Dense( units=self.hidden_size, activation='relu', input_dim=self.stateCnt ) )
-        model.add( Dense( units=2*self.hidden_size, activation='relu' ) )
-        model.add( Dense( units=self.hidden_size,   activation='relu' ) )
-        model.add( Dense( units=self.actionCnt,     activation='linear' ) )
-        model.compile( loss='mse', optimizer='adam', metrics=['mae'] )
-        return model
-
-
-    def _model_no_2(self):
-        model = Sequential()
-        model.add( Dense( units=self.hidden_size, activation='softmax', input_dim=self.stateCnt ) )
-        model.add( Dense( units=self.hidden_size, activation='relu' ) )
-        model.add( Dense( units=self.hidden_size, activation='relu' ) )
-        model.add( Dense( units=self.hidden_size, activation='relu' ) )
-        model.add( Dense( units=self.actionCnt,   activation='linear' ) )
-        model.compile( loss='mse', optimizer='adam')
+    def _cnn_2d(self, dim):
+       
+        model = Sequential() 
+        model.add(Convolution2D(32, (3, 3), input_shape=(dim, dim, 4), data_format="channels_last"))
+        model.add(Activation('relu'))
+#        model.add(Convolution2D(32, (3, 3) ) )
+        #model.add(Activation('relu'))
+        #model.add(Convolution2D(64, 2, 2, subsample=(1, 1)))
+        #model.add(Activation('relu'))
+        model.add(Flatten())
+        #model.add(Dense(128))
+        #model.add(Activation('relu'))
+        model.add(Dense(self.actionCnt))
+        model.add(Activation('linear'))
+        model.compile( loss='mse', optimizer='adam', metrics=['mae'] ) 
         return model
 
 
@@ -111,11 +108,11 @@ class Agent:
     steps = 0
     epsilon = MAX_EPSILON
 
-    def __init__(self, stateCnt, actionCnt):
+    def __init__(self, stateCnt, actionCnt, dim):
         self.stateCnt = stateCnt
         self.actionCnt = actionCnt
 
-        self.brain = Brain(stateCnt, actionCnt)
+        self.brain = Brain(stateCnt, actionCnt, dim)
         self.memory = Memory(MEMORY_CAPACITY)
         
     def act(self, s):
@@ -187,25 +184,51 @@ class Environment:
         self.problem = problem
         self.env = gym.make(problem)
 
+        # necessary to access DIM variable
+        # https://github.com/devsisters/DQN-tensorflow/issues/29
+        self.env = self.env.unwrapped
+        self.history = np.zeros( [self.env.DIM,self.env.DIM,4] )
+
+    def _phi(self, s_):
+        m,n,d = self.history.shape
+
+        for i in range(d - 1):
+            self.history[:,:,i] = self.history[:,:,i+1]
+        
+        self.history[:,:,d-1] = s_.reshape(m,n)
+
+        return self.history.copy()
+    
     def run(self, agent):
+        self.history = np.zeros( [self.env.DIM,self.env.DIM,4] )
         s = self.env.reset()
         R = 0 
 
+        cc = 0
+        
         while True:            
             # self.env.render()
 
             a = agent.act(s)
 
             s_, r, done, info = self.env.step(a)
-
+            
             if done: # terminal state
                 s_ = None
-
-            agent.observe( (s, a, r, s_) )
+            
+            p  = self.history.copy()
+            if done:
+                p_ = None
+            else:
+                p_ = self._phi(s_)
+            
+            agent.observe( (p, a, r, p_) )
+            #agent.observe( (s, a, r, s_) )
             agent.replay()            
 
             s = s_
             R += r
+            cc += 1
 
             if done:
                 break
@@ -216,18 +239,18 @@ class Environment:
 # Ensure we always get the same amount of randomness
 # For tests and training only
 
-np.random.seed(404)
+np.random.seed(1234)
 
 PROBLEM = 'MagicSquare3x3-v0'
 #PROBLEM = 'MagicSquare5x5-v0'
 #PROBLEM = 'MagicSquare10x10-v0'
 env = Environment(PROBLEM)
-env.env.seed(404)
+env.env.seed(1234)
 
 stateCnt  = env.env.observation_space.shape[0]
 actionCnt = env.env.action_space.n
 
-agent = Agent(stateCnt, actionCnt)
+agent = Agent(stateCnt, actionCnt, env.env.DIM)
 randomAgent = RandomAgent(actionCnt)
 
 dir_out = './model/'
