@@ -13,19 +13,15 @@ import math
 import gym
 import numpy as np
 from gym import spaces
-from gym.utils import seeding
 
 
 class MagicSquareEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, DIM_=3, seed_=None):
-        # SET SEED FIXED
-        seed_=123
-  
-        self. M = DIM_*(DIM_*DIM_+1)/2
+    def __init__(self, DIM=3, seed=None):
         # General variables defining the environment
-        self.DIM = DIM_
+        self. M = DIM*(DIM*DIM+1)/2
+        self.DIM = DIM
         self.swaps = []
 
         extra_step = 0
@@ -38,7 +34,8 @@ class MagicSquareEnv(gym.Env):
                         if first_ > second_:
                             self.swaps.append( (first_,second_) )
                             extra_step += 1
-                    
+        
+        print extra_step
         self.action_space = spaces.Discrete( extra_step )
                 
         self.observation_space = np.ones(self.DIM*self.DIM)
@@ -47,7 +44,7 @@ class MagicSquareEnv(gym.Env):
         self.curr_step = -1 
    
         # Simulation related variables.
-        self.seed(seed_)
+        self.seed(seed)
         self.reset()
  
 
@@ -152,10 +149,9 @@ class MagicSquareEnv(gym.Env):
         return
 
 
-    def seed(self, seed=None):
-#        np.random.seed(123)
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
+    def seed(self, seed_):
+        random.seed(seed_)
+        return [seed_]
     
     
     def render(self, mode='human', close=False):
@@ -169,27 +165,27 @@ class MagicSquareEnv(gym.Env):
 class MagicSquare3x3(MagicSquareEnv):
     """
     """
-    def __init__(self,seed_=None):
+    def __init__(self, seed_=None):
         self.__version__ = "0.1"
         print("MagicSqaure3x3 - Version {}".format(self.__version__))
-        super(MagicSquare3x3, self).__init__(DIM_=3,seed_=seed_)
+        super(MagicSquare3x3, self).__init__(DIM=3, seed=seed_)
 
 
 class MagicSquare5x5(MagicSquareEnv):
     """
     """
-    def __init__(self,seed_=None):
+    def __init__(self, seed_=None):
         self.__version__ = "0.1"
         print("MagicSqaure5x5 - Version {}".format(self.__version__))
-        super(MagicSquare5x5, self).__init__(DIM_=5,seed_=seed_)
+        super(MagicSquare5x5, self).__init__(DIM=5, seed=seed_)
 
 
 class MagicSquare10x10(MagicSquareEnv):
     """
     """
-    def __init__(self,seed_=None):
+    def __init__(self, seed_=None):
         self.__version__ = "0.1"
         print("MagicSqaure10x10 - Version {}".format(self.__version__))
-        super(MagicSquare10x10, self).__init__(DIM_=10,seed_=seed_)
+        super(MagicSquare10x10, self).__init__(DIM=10, seed=seed_)
 
 

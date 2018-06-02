@@ -215,12 +215,14 @@ class Environment:
 #-------------------- MAIN ----------------------------
 # Ensure we always get the same amount of randomness
 # For tests and training only
-np.random.seed(123)
+
+np.random.seed(404)
 
 PROBLEM = 'MagicSquare3x3-v0'
 #PROBLEM = 'MagicSquare5x5-v0'
 #PROBLEM = 'MagicSquare10x10-v0'
 env = Environment(PROBLEM)
+env.env.seed(404)
 
 stateCnt  = env.env.observation_space.shape[0]
 actionCnt = env.env.action_space.n
