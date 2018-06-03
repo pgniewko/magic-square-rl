@@ -4,6 +4,7 @@
 # author: Pawel Gniewek, 2018
 #
 
+import random
 import numpy as np
 from keras import backend as K
 import tensorflow as tf
@@ -21,8 +22,10 @@ if __name__ == "__main__":
 
     env = gym.make(PROBLEM)
     state_cnt = env.observation_space.shape[0]
+    action_cnt = env.action_space.n
     dim = int(state_cnt**0.5)
 
+    epsilon = 0.05
     # Play only one game
     for episode in range(1):
         c = 0
@@ -30,7 +33,11 @@ if __name__ == "__main__":
         game_over = False
 
         while not game_over:
-            a = np.argmax( model.predict( s.reshape(1, state_cnt) ).flatten() )
+            if random.random() < epsilon:
+                a = random.randint(0, action_cnt-1)
+            else:
+                a = np.argmax( model.predict( s.reshape(1, state_cnt) ).flatten() )
+            
             s_, r, done, info = env.step(a)
             s = s_
             
