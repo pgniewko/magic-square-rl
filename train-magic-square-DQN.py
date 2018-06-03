@@ -179,11 +179,8 @@ class Environment:
     def run(self, agent):
         s = self.env.reset()
         R = 0 
-        
-        cc = 0
         while True:            
             a = agent.act(s)
-
             s_, r, done, info = self.env.step(a)
             
             if done: # terminal state
@@ -195,9 +192,8 @@ class Environment:
             s = s_
             R += r
  
-            cc += 1
- 
             if done:
+                print info
                 break
 
         print("Total reward:", R)
@@ -209,7 +205,7 @@ class Environment:
 np.random.seed(404)
 
 PROBLEM = 'MagicSquare3x3-v0'
-PROBLEM = 'MagicSquare5x5-v0'
+#PROBLEM = 'MagicSquare5x5-v0'
 #PROBLEM = 'MagicSquare10x10-v0'
 env = Environment(PROBLEM)
 env.env.seed(404)

@@ -66,7 +66,8 @@ class MagicSquareEnv(gym.Env):
         info_['nrows'] = r1
         info_['ncols'] = r2
         info_['ndiag'] = r3
-        
+        info_['reward']= reward
+
         self.is_square_solved = reward == 0
 
         if self.is_square_solved:
