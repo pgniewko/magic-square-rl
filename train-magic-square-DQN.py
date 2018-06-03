@@ -28,7 +28,7 @@ class Brain:
     def __init__(self, state_cnt, action_cnt):
         self.state_cnt = state_cnt
         self.action_cnt = action_cnt
-        self.lr = 0.1
+        self.lr = 0.01
 
         self.model  = self._dnn()
         self.model_ = self._dnn()
@@ -40,7 +40,7 @@ class Brain:
         model = Sequential() 
         model.add(Dense(64, input_dim=self.state_cnt, activation='relu'))
         model.add(Dense(64, activation='relu'))
-        model.add(Dense(self.action_cnt, activation='softmax'))
+        model.add(Dense(self.action_cnt, activation='linear'))
         model.compile(loss='mse',optimizer=opt_, metrics=['mae'])       
         return model
 
@@ -123,6 +123,7 @@ class Agent:
         self.steps += 1
         self.epsilon = MIN_EPSILON + (MAX_EPSILON - MIN_EPSILON) * math.exp(-LAMBDA * self.steps)
 
+
     def replay(self):    
         batch = self.memory.sample(BATCH_SIZE)
         batchLen = len(batch)
@@ -174,9 +175,11 @@ class Environment:
     def __init__(self, problem):
         self.problem = problem
         self.env = gym.make(problem)
+        self.best = {}
 
 
     def run(self, agent):
+        self.best = {}
         s = self.env.reset()
         R = 0 
         while True:            
@@ -188,12 +191,21 @@ class Environment:
             
             agent.observe( (s, a, r, s_) )
             agent.replay()            
+           
+            if 'info' in self.best.keys():
+                if self.best['info']['reward'] < r:
+                   self.best['s'] = s_
+                   self.best['info'] = info
+            else:
+                self.best['s'] = s_
+                self.best['info'] = info
+                
 
             s = s_
             R += r
  
             if done:
-                print info
+                print self.best
                 break
 
         print("Total reward:", R)
@@ -205,7 +217,7 @@ class Environment:
 np.random.seed(404)
 
 PROBLEM = 'MagicSquare3x3-v0'
-#PROBLEM = 'MagicSquare5x5-v0'
+PROBLEM = 'MagicSquare5x5-v0'
 #PROBLEM = 'MagicSquare10x10-v0'
 env = Environment(PROBLEM)
 env.env.seed(404)
