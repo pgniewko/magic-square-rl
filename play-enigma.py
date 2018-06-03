@@ -3,14 +3,8 @@
 #
 # author: Pawel Gniewek, 2018
 #
-#
-#--- enable this to run on GPU
-# import os
-# os.environ['THEANO_FLAGS'] = "device=gpu,floatX=float32"
-
 
 import numpy as np
-
 from keras import backend as K
 import tensorflow as tf
 from keras.models import load_model
@@ -20,7 +14,7 @@ import gym_magic
 
 if __name__ == "__main__":
 
-    PROBLEM = 'MagicSquare3x3P1-v0'
+    PROBLEM = 'MagicSquare3x3-v0'
     model_dir = './model'
     model_file = model_dir + "/" + PROBLEM + "-dqn.h5"
     model = load_model(model_file)
@@ -36,13 +30,12 @@ if __name__ == "__main__":
         game_over = False
 
         while not game_over:
-            a=np.argmax( model.predict( s.reshape(1, state_cnt) ).flatten() )
-
+            a = np.argmax( model.predict( s.reshape(1, state_cnt) ).flatten() )
             s_, r, done, info = env.step(a)
-
-            print c, r, a, s_.reshape((dim,dim)) 
-            
             s = s_
             
-            c +=1
+            print done, info
+            if done:
+                game_over = True
+
 

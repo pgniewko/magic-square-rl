@@ -25,32 +25,23 @@ class Brain:
     """
     """
 
-    def __init__(self, stateCnt, actionCnt, dim):
-        self.stateCnt = stateCnt
-        self.actionCnt = actionCnt
-        self.hidden_size = 100
-        self.LEARNING_RATE = 0.1
+    def __init__(self, state_cnt, action_cnt):
+        self.state_cnt = state_cnt
+        self.action_cnt = action_cnt
+        self.lr = 0.1
 
-        self.model  = self._cnn_2d(dim)
-        self.model_ = self._cnn_2d(dim)
+        self.model  = self._dnn()
+        self.model_ = self._dnn()
 
         print( self.model.summary() )
 
-    def _cnn_2d(self, dim):
-       
+    def _dnn(self):
+        opt_ = Adam(lr=self.lr)
         model = Sequential() 
-        model.add(Convolution2D(32, (3, 3), input_shape=(dim, dim, 4), data_format="channels_last"))
-        model.add(Activation('relu'))
-#        model.add(Convolution2D(32, (3, 3) ) )
-        #model.add(Activation('relu'))
-        #model.add(Convolution2D(64, 2, 2, subsample=(1, 1)))
-        #model.add(Activation('relu'))
-        model.add(Flatten())
-        #model.add(Dense(128))
-        #model.add(Activation('relu'))
-        model.add(Dense(self.actionCnt))
-        model.add(Activation('linear'))
-        model.compile( loss='mse', optimizer='adam', metrics=['mae'] ) 
+        model.add(Dense(64, input_dim=self.state_cnt, activation='relu'))
+        model.add(Dense(64, activation='relu'))
+        model.add(Dense(self.action_cnt, activation='softmax'))
+        model.compile(loss='mse',optimizer=opt_, metrics=['mae'])       
         return model
 
 
@@ -66,7 +57,7 @@ class Brain:
 
 
     def predictOne(self, s, target=False):
-        return self.predict(s.reshape(1, self.stateCnt), target=target).flatten()
+        return self.predict(s.reshape(1, self.state_cnt), target=target).flatten()
 
 
     def updateTargetModel(self):
@@ -108,13 +99,13 @@ class Agent:
     steps = 0
     epsilon = MAX_EPSILON
 
-    def __init__(self, stateCnt, actionCnt, dim):
+    def __init__(self, stateCnt, actionCnt):
         self.stateCnt = stateCnt
         self.actionCnt = actionCnt
-
-        self.brain = Brain(stateCnt, actionCnt, dim)
+        self.brain = Brain(stateCnt, actionCnt)
         self.memory = Memory(MEMORY_CAPACITY)
         
+
     def act(self, s):
         if random.random() < self.epsilon:
             return random.randint(0, self.actionCnt-1)
@@ -156,7 +147,7 @@ class Agent:
                 t[a] = r
             else:
                 t[a] = r + GAMMA * np.amax(p_[i])
-
+            
             x[i] = s
             y[i] = t
 
@@ -184,31 +175,13 @@ class Environment:
         self.problem = problem
         self.env = gym.make(problem)
 
-        # necessary to access DIM variable
-        # https://github.com/devsisters/DQN-tensorflow/issues/29
-        self.env = self.env.unwrapped
-        self.history = np.zeros( [self.env.DIM,self.env.DIM,4] )
 
-    def _phi(self, s_):
-        m,n,d = self.history.shape
-
-        for i in range(d - 1):
-            self.history[:,:,i] = self.history[:,:,i+1]
-        
-        self.history[:,:,d-1] = s_.reshape(m,n)
-
-        return self.history.copy()
-    
     def run(self, agent):
-        self.history = np.zeros( [self.env.DIM,self.env.DIM,4] )
         s = self.env.reset()
         R = 0 
-
-        cc = 0
         
+        cc = 0
         while True:            
-            # self.env.render()
-
             a = agent.act(s)
 
             s_, r, done, info = self.env.step(a)
@@ -216,20 +189,14 @@ class Environment:
             if done: # terminal state
                 s_ = None
             
-            p  = self.history.copy()
-            if done:
-                p_ = None
-            else:
-                p_ = self._phi(s_)
-            
-            agent.observe( (p, a, r, p_) )
-            #agent.observe( (s, a, r, s_) )
+            agent.observe( (s, a, r, s_) )
             agent.replay()            
 
             s = s_
             R += r
+ 
             cc += 1
-
+ 
             if done:
                 break
 
@@ -239,18 +206,18 @@ class Environment:
 # Ensure we always get the same amount of randomness
 # For tests and training only
 
-np.random.seed(1234)
+np.random.seed(404)
 
 PROBLEM = 'MagicSquare3x3-v0'
-#PROBLEM = 'MagicSquare5x5-v0'
+PROBLEM = 'MagicSquare5x5-v0'
 #PROBLEM = 'MagicSquare10x10-v0'
 env = Environment(PROBLEM)
-env.env.seed(1234)
+env.env.seed(404)
 
 stateCnt  = env.env.observation_space.shape[0]
 actionCnt = env.env.action_space.n
 
-agent = Agent(stateCnt, actionCnt, env.env.DIM)
+agent = Agent(stateCnt, actionCnt)
 randomAgent = RandomAgent(actionCnt)
 
 dir_out = './model/'
@@ -259,12 +226,14 @@ if not os.path.exists( dir_out ):
     os.makedirs( dir_out )
 
 try:
+    print("RANDOM AGENT - FILLIN IN THE MEMORY")
     while randomAgent.memory.isFull() == False:
         env.run(randomAgent)
 
     agent.memory.samples = randomAgent.memory.samples
     randomAgent = None
 
+    print("AGENT - MODEL TRAINING")
     while True:
         env.run(agent)
         agent.brain.model.save(dir_out+PROBLEM + "-dqn.h5")

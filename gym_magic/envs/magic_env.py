@@ -5,21 +5,18 @@
 ... 
 """
 
-# core modules
 import random
 import math
-
-# 3rd party modules
 import gym
 import numpy as np
 from gym import spaces
 
 
 class MagicSquareEnv(gym.Env):
-    metadata = {'render.modes': ['human']}
-
+    """
+    ...
+    """
     def __init__(self, DIM=3, seed=None):
-        # General variables defining the environment
         self.M = DIM*(DIM*DIM+1)/2
         self.DIM = DIM
         self.swaps = []
@@ -83,7 +80,7 @@ class MagicSquareEnv(gym.Env):
         f_val = self.state[f_]
         self.state[f_] = self.state[s_]
         self.state[s_] = f_val
-        return self.state
+        return self.state.copy()
 
 
     def _get_reward(self):
