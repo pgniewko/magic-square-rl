@@ -18,6 +18,7 @@ class MagicSquareEnv(gym.Env):
     """
     def __init__(self, DIM=3, seed=None):
         self.M = DIM*(DIM*DIM+1)/2
+        self.rx_ = [0,0,0]
         self.DIM = DIM
         self.swaps = []
 
@@ -47,6 +48,7 @@ class MagicSquareEnv(gym.Env):
 
     def reset(self):
         self.curr_step = 0
+        self.rx_ = [0,0,0]
         self.is_square_solved=False
         self.state = np.arange( 1, self.DIM*self.DIM+1, 1, dtype=int)
         np.random.shuffle( self.state )
@@ -58,17 +60,13 @@ class MagicSquareEnv(gym.Env):
         
         self.curr_step += 1
         new_state = self._take_action(action)
-        reward, r1, r2, r3 = self._get_reward()
-
+        reward = self._get_reward()
 
         info_ = {}
         info_['steps'] = self.curr_step
-        info_['nrows'] = r1
-        info_['ncols'] = r2
-        info_['ndiag'] = r3
-        info_['reward']= reward
-
-        self.is_square_solved = reward == 0
+        info_['nrows'] = self.rx_[0]
+        info_['ncols'] = self.rx_[1]
+        info_['ndiag'] = self.rx_[2]
 
         if self.is_square_solved:
             self._print_ms()
@@ -92,12 +90,28 @@ class MagicSquareEnv(gym.Env):
       
         sums_ = np.append(np.append( row_sums, column_sums), diagonal_sums  )
         arr_ = sums_ - self.M
-        reward = np.sum( arr_**2 )
-        reward *= -1 
+        residues = np.sum( arr_**2 )
+        
         r1 = np.sum( (row_sums-self.M) == 0)
         r2 = np.sum( (column_sums-self.M) == 0)
         r3 = np.sum( (diagonal_sums-self.M) == 0)
-        return (reward, r1, r2, r3)
+
+        previous = np.sum(self.rx_)
+        current  = np.sum([r1,r2,r3])
+        self.rx_ = [r1,r2,r3]
+
+        if previous == current:
+            reward = 0
+        elif previous > current:
+            reward = -1
+        else:
+            reward = 1
+
+        self.is_square_solved = residues == 0
+        if self.is_square_solved:
+            reward = 1
+
+        return reward 
 
 
     def _print_ms(self):

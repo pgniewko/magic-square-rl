@@ -193,11 +193,8 @@ class Environment:
     def __init__(self, problem):
         self.problem = problem
         self.env = gym.make(problem)
-        self.best = {}
-
 
     def run(self, agent):
-        self.best = {}
         s = self.env.reset()
         R = 0 
         while True:            
@@ -211,20 +208,10 @@ class Environment:
             agent.replay()            
             agent.update_target_model()
 
-            if 'info' in self.best.keys():
-                if self.best['info']['reward'] < r:
-                   self.best['s'] = s_
-                   self.best['info'] = info
-            else:
-                self.best['s'] = s_
-                self.best['info'] = info
-                
-
             s = s_
             R += r
  
             if done:
-                print self.best
                 break
 
         print("Total reward:", R)
