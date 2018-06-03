@@ -17,7 +17,8 @@ import gym_magic
 
 #-------------------- BRAIN ---------------------------
 from keras.models import Sequential
-from keras.layers import Dense, Activation, Flatten, Convolution2D
+from keras.layers import Dense, Activation, Flatten
+from keras.layers import Dropout, BatchNormalization
 from keras.layers import *
 from keras.optimizers import *
 
@@ -28,18 +29,33 @@ class Brain:
     def __init__(self, state_cnt, action_cnt):
         self.state_cnt = state_cnt
         self.action_cnt = action_cnt
-        self.lr = 0.01
+        self.lr = 1e-4
+        self.droprate=0.1
 
         self.model  = self._dnn()
         self.model_ = self._dnn()
+        self.update_target_model()
 
         print( self.model.summary() )
+
 
     def _dnn(self):
         opt_ = Adam(lr=self.lr)
         model = Sequential() 
-        model.add(Dense(64, input_dim=self.state_cnt, activation='relu'))
-        model.add(Dense(64, activation='relu'))
+        
+        model.add(Dense(256, input_dim=self.state_cnt) )
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        
+        model.add(Dense(256, input_dim=self.state_cnt) )
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        
+        model.add(Dense(256))
+        model.add(BatchNormalization())
+        model.add(Activation('relu'))
+        model.add(Dropout(self.droprate))
+        
         model.add(Dense(self.action_cnt, activation='linear'))
         model.compile(loss='mse',optimizer=opt_, metrics=['mae'])       
         return model
@@ -60,7 +76,7 @@ class Brain:
         return self.predict(s.reshape(1, self.state_cnt), target=target).flatten()
 
 
-    def updateTargetModel(self):
+    def update_target_model(self):
         self.model_.set_weights(self.model.get_weights())
 
 #-------------------- MEMORY --------------------------
@@ -90,8 +106,8 @@ BATCH_SIZE = 64
 GAMMA = 0.99
 
 MAX_EPSILON = 1
-MIN_EPSILON = 0.01
-LAMBDA = 0.001      # speed of decay
+MIN_EPSILON = 0.1
+LAMBDA = 0.001
 
 UPDATE_TARGET_FREQUENCY = 1000
 
@@ -114,15 +130,14 @@ class Agent:
 
     def observe(self, sample):  # in (s, a, r, s_) format
         self.memory.add(sample)        
-
-        if self.steps % UPDATE_TARGET_FREQUENCY == 0:
-            self.brain.updateTargetModel()
-
-
         # slowly decrease Epsilon based on our eperience
         self.steps += 1
         self.epsilon = MIN_EPSILON + (MAX_EPSILON - MIN_EPSILON) * math.exp(-LAMBDA * self.steps)
 
+    def update_target_model(self):
+        if self.steps % UPDATE_TARGET_FREQUENCY == 0:
+            self.brain.update_target_model()
+        
 
     def replay(self):    
         batch = self.memory.sample(BATCH_SIZE)
@@ -170,6 +185,9 @@ class RandomAgent:
     def replay(self):
         pass
 
+    def update_target_model(self):
+        pass
+
 #-------------------- ENVIRONMENT ---------------------
 class Environment:
     def __init__(self, problem):
@@ -191,7 +209,8 @@ class Environment:
             
             agent.observe( (s, a, r, s_) )
             agent.replay()            
-           
+            agent.update_target_model()
+
             if 'info' in self.best.keys():
                 if self.best['info']['reward'] < r:
                    self.best['s'] = s_
@@ -211,39 +230,39 @@ class Environment:
         print("Total reward:", R)
 
 #-------------------- MAIN ----------------------------
+if __name__ == "__main__":
 # Ensure we always get the same amount of randomness
-# For tests and training only
+# For tests only
+    np.random.seed(404)
 
-np.random.seed(404)
+    PROBLEM = 'MagicSquare3x3-v0'
+#    PROBLEM = 'MagicSquare5x5-v0'
+#    PROBLEM = 'MagicSquare10x10-v0'
+    env = Environment(PROBLEM)
+    env.env.seed(404)
 
-PROBLEM = 'MagicSquare3x3-v0'
-PROBLEM = 'MagicSquare5x5-v0'
-#PROBLEM = 'MagicSquare10x10-v0'
-env = Environment(PROBLEM)
-env.env.seed(404)
+    state_cnt  = env.env.observation_space.shape[0]
+    action_cnt = env.env.action_space.n
 
-stateCnt  = env.env.observation_space.shape[0]
-actionCnt = env.env.action_space.n
+    agent = Agent(state_cnt, action_cnt)
+    randomAgent = RandomAgent(action_cnt)
 
-agent = Agent(stateCnt, actionCnt)
-randomAgent = RandomAgent(actionCnt)
+    dir_out = './model/'
 
-dir_out = './model/'
+    if not os.path.exists( dir_out ):
+        os.makedirs( dir_out )
 
-if not os.path.exists( dir_out ):
-    os.makedirs( dir_out )
+    try:
+        print("RANDOM AGENT - FILLIN IN THE MEMORY")
+        while randomAgent.memory.isFull() == False:
+            env.run(randomAgent)
 
-try:
-    print("RANDOM AGENT - FILLIN IN THE MEMORY")
-    while randomAgent.memory.isFull() == False:
-        env.run(randomAgent)
+        agent.memory.samples = randomAgent.memory.samples
+        randomAgent = None
 
-    agent.memory.samples = randomAgent.memory.samples
-    randomAgent = None
-
-    print("AGENT - MODEL TRAINING")
-    while True:
-        env.run(agent)
+        print("AGENT - MODEL TRAINING")
+        while True:
+            env.run(agent)
+            agent.brain.model.save(dir_out+PROBLEM + "-dqn.h5")
+    finally:
         agent.brain.model.save(dir_out+PROBLEM + "-dqn.h5")
-finally:
-    agent.brain.model.save(dir_out+PROBLEM + "-dqn.h5")
