@@ -46,7 +46,7 @@ python play-magic-square.py
 ...
 
 ## CREDITS
-Part of the code for Deep-Q-Learning is based on this [blog-post](). 
+Part of the code for Deep-Q-Learning is based on this [blog-post](https://github.com/jaara/AI-blog/blob/master/CartPole-basic.py).  
 
 ## REFERENCES
 1. "Human-level control through deep reinforcement learning", Nature 518 (7540), 529-533
