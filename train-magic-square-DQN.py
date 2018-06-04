@@ -55,8 +55,9 @@ class Brain:
         model.add(BatchNormalization())
         model.add(Activation('relu'))
         model.add(Dropout(self.droprate))
-        
-        model.add(Dense(self.action_cnt, activation='linear'))
+       
+        #model.add(Dense(self.action_cnt, activation='linear')) [-x,x]
+        model.add(Dense(self.action_cnt, activation='tanh')) # [-1,1] range
         model.compile(loss='mse',optimizer=opt_, metrics=['mae'])       
         return model
 

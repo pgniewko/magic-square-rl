@@ -106,6 +106,15 @@ class MagicSquareEnv(gym.Env):
             reward = -1
         else:
             reward = 1
+   
+        # NEW REWARD FUNCTION
+        if current == 0:
+            reward = -1
+        elif current == (2*self.DIM+2):
+            reward = 1
+        else:
+            reward = 0
+
 
         self.is_square_solved = residues == 0
         if self.is_square_solved:
