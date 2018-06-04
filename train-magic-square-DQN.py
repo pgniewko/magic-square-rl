@@ -54,10 +54,9 @@ class Brain:
         model.add(Dense(256))
         model.add(BatchNormalization())
         model.add(Activation('relu'))
-        model.add(Dropout(self.droprate))
+#        model.add(Dropout(self.droprate))
        
-        #model.add(Dense(self.action_cnt, activation='linear')) [-x,x]
-        model.add(Dense(self.action_cnt, activation='tanh')) # [-1,1] range
+        model.add(Dense(self.action_cnt, activation='softmax'))
         model.compile(loss='mse',optimizer=opt_, metrics=['mae'])       
         return model
 
@@ -224,7 +223,7 @@ if __name__ == "__main__":
     np.random.seed(404)
 
     PROBLEM = 'MagicSquare3x3-v0'
-#    PROBLEM = 'MagicSquare5x5-v0'
+    PROBLEM = 'MagicSquare5x5-v0'
 #    PROBLEM = 'MagicSquare10x10-v0'
     env = Environment(PROBLEM)
     env.env.seed(404)
@@ -241,7 +240,7 @@ if __name__ == "__main__":
         os.makedirs( dir_out )
 
     try:
-        print("RANDOM AGENT - FILLIN IN THE MEMORY")
+        print("RANDOM AGENT - FILLING IN THE MEMORY")
         while randomAgent.memory.isFull() == False:
             env.run(randomAgent)
 

@@ -100,25 +100,16 @@ class MagicSquareEnv(gym.Env):
         current  = np.sum([r1,r2,r3])
         self.rx_ = [r1,r2,r3]
 
-        if previous == current:
-            reward = 0
-        elif previous > current:
-            reward = -1
-        else:
-            reward = 1
-   
+#        if previous == current:
+#            reward = 0
+#        elif previous > current:
+#            reward = -1
+#        else:
+#            reward = 1
+#   
         # NEW REWARD FUNCTION
-        if current == 0:
-            reward = -1
-        elif current == (2*self.DIM+2):
-            reward = 1
-        else:
-            reward = 0
-
-
+        reward = current - previous
         self.is_square_solved = residues == 0
-        if self.is_square_solved:
-            reward = 1
 
         return reward 
 
