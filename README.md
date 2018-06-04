@@ -17,7 +17,7 @@ pip install -e .
 * numpy
 * keras
 * tensorflow
-* gym: [installation instruction](https://github.com/openai/gym)
+* gym: `pip install gym` 
 * tabulate: `pip install tabulate`
 
 
