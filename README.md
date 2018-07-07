@@ -56,4 +56,13 @@ Part of the code for Deep-Q-Learning is based on this [blog-post](https://github
 ## TODO
 1. Tinker Brain's architecture   
 2. Implement graphics window for `play-magic-sqaure.py`   
-3. Explore (and clip) the reward function   
+3. For further improvement ideas check out these:
+    * [Beat Atari with Deep Reinforcement Learning! (Part 1: DQN)](https://becominghuman.ai/lets-build-an-atari-ai-part-1-dqn-df57e8ff3b26)
+    * [Beat Atari with Deep Reinforcement Learning! (Part 2: DQN improvements)](https://becominghuman.ai/beat-atari-with-deep-reinforcement-learning-part-2-dqn-improvements-d3563f665a2c)
+    * [How to build your own AlphaZero AI using Python and Keras](https://medium.com/applied-data-science/how-to-build-your-own-alphazero-ai-using-python-and-keras-7f664945c188)
+    * [A Deep Dive into Reinforcement Learning](https://www.toptal.com/machine-learning/deep-dive-into-reinforcement-learning)
+    * [OpenAI Baselines: DQN](https://blog.openai.com/openai-baselines-dqn/)
+    * [Frame Skipping and Pre-Processing for Deep Q-Networks on Atari 2600 Games](https://danieltakeshi.github.io/2016/11/25/frame-skipping-and-preprocessing-for-deep-q-networks-on-atari-2600-games/)
+
+
+
