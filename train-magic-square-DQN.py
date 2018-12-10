@@ -56,7 +56,7 @@ class Brain:
         model.add(Activation('relu'))
 #        model.add(Dropout(self.droprate))
        
-        model.add(Dense(self.action_cnt, activation='softmax'))
+        model.add(Dense(self.action_cnt, activation='elu'))
         model.compile(loss='mse',optimizer=opt_, metrics=['mae'])       
         return model
 

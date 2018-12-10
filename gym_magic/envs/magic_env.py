@@ -167,26 +167,7 @@ class MagicSquare3x3(MagicSquareEnv):
     """
     """
     def __init__(self, seed_=None):
-        self.__version__ = "0.1"
+        self.__version__ = "0.2"
         print("MagicSqaure3x3 - Version {}".format(self.__version__))
         super(MagicSquare3x3, self).__init__(DIM=3, seed=seed_)
-
-
-class MagicSquare5x5(MagicSquareEnv):
-    """
-    """
-    def __init__(self, seed_=None):
-        self.__version__ = "0.1"
-        print("MagicSqaure5x5 - Version {}".format(self.__version__))
-        super(MagicSquare5x5, self).__init__(DIM=5, seed=seed_)
-
-
-class MagicSquare10x10(MagicSquareEnv):
-    """
-    """
-    def __init__(self, seed_=None):
-        self.__version__ = "0.1"
-        print("MagicSqaure10x10 - Version {}".format(self.__version__))
-        super(MagicSquare10x10, self).__init__(DIM=10, seed=seed_)
-
 
