@@ -11,15 +11,42 @@ all_3x3_magic_squares = [
             [[2, 7, 6], [9, 5, 1], [4, 3, 8]],
             ]
 
-def random_ms():
+all_moves = [
+        [0,0,1,1],
+        [0,1,1,1],
+        [0,2,1,1],
+        [1,0,1,1],
+        [1,2,1,1],
+        [2,0,1,1],
+        [2,1,1,1],
+        [2,2,1,1],
+        ]
+
+def random_ms(scramble=0):
 
     n = len(all_3x3_magic_squares)
     ix = np.random.randint(0, n)
-    return all_3x3_magic_squares[ix]
+    ms = all_3x3_magic_squares[ix]
 
+    for i in range(scramble):
+        n = len(all_moves)
+        ix = np.random.randint(0, n)
+        x1,y1,x2,y2 = all_moves[ix]
+        tmp_val =  ms[x2][y2]
+        ms[x2][y2] = ms[x1][y1]
+        ms[x1][y1] = tmp_val
+
+    return ms
+
+def print_ms(ms):
+    print "========="
+    print ms[0]
+    print ms[1]
+    print ms[2]
+    print "========="
 
 
 if __name__ == "__main__":
-     print random_ms()
-     print random_ms()
-     print random_ms()
+     print_ms(random_ms(0))
+     print_ms(random_ms(1))
+     print_ms(random_ms(2))
