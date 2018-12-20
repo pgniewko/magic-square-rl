@@ -6,8 +6,8 @@
 
 import random
 import math
-import gym
 import numpy as np
+import gym
 from gym import spaces
 import ms as ms_lib
 
@@ -17,10 +17,8 @@ class MagicSquare3x3(gym.Env):
     ...
     """
     def __init__(self, seed=None):
-#        self.__version__ = "0.3"
-#        print("MagicSqaure3x3 - Version {}".format(self.__version__))
         self.DIM = 3
-        self.M = self.DIM * (self.DIM * self.DIM+ 1 ) / 2
+        self.M = self.DIM * (self.DIM * self.DIM + 1 ) / 2
         self.swaps = ms_lib.all_moves
 
         self.action_space = spaces.Discrete( len(self.swaps) )
@@ -30,20 +28,23 @@ class MagicSquare3x3(gym.Env):
         self.curr_step = 0 
         
         ## EXTRAS
-        self.scramble = 1
+        self.DIFFICULTY_LEVEL = 1
         self.success_counter = 0
         self.experience_factor = 1000
-   
+
         # Simulation related variables.
         self.seed(seed)
         self.reset()
-        
+
+
+    def configure(self, dl=1):
+        self.DIFFICULTY_LEVEL = dl
+
 
     def reset(self):
         self.curr_step = 0
-        self.is_square_solved=False
-        self.state = ms_lib.random_ms( self.scramble )
-       
+        self.is_square_solved = False
+        self.state = ms_lib.random_ms( self.DIFFICULTY_LEVEL )
         return self.state
 
 
@@ -61,8 +62,10 @@ class MagicSquare3x3(gym.Env):
             self._print_ms()
             self.success_counter += 1
             if self.success_counter % self.experience_factor == 0:
-                self.scramble += 1
-                print "Scrambling level increased to ", self.scramble
+                self.DIFFICULTY_LEVEL += 1
+                print "Scrambling level increased to ", self.DIFFICULTY_LEVEL
+        
+        info_['level'] = self.DIFFICULTY_LEVEL
 
         return new_state, reward, self.is_square_solved, info_
 
@@ -126,7 +129,6 @@ class MagicSquare3x3(gym.Env):
         table = tabulate(ms_ext, tablefmt="fancy_grid")
         
         print(table)
-        
         return
 
 

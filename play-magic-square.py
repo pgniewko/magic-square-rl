@@ -118,16 +118,20 @@ def draw_grid(ms_):
 if __name__ == "__main__":
 
     PROBLEM = 'MagicSquare3x3-v0'
+    DIFFICULTY_LEVEL = 1
     model_dir = './model'
-    model_file = model_dir + "/" + PROBLEM + "-dqn.h5"
+    model_file = model_dir + "/" + PROBLEM + "-dqn.dl-%d.h5" %(DIFFICULTY_LEVEL)
+    print model_file
     model = load_model(model_file)
 
+
     env = gym.make(PROBLEM)
+    env = env.unwrapped
+    env.configure(dl=DIFFICULTY_LEVEL)
     state_cnt = env.observation_space.shape[0]
     action_cnt = env.action_space.n
-    dim = int(state_cnt**0.5)
 
-    epsilon = 0.01
+    epsilon = 0.1
     # Play only one game
     for episode in range(1):
         c = 0
