@@ -100,14 +100,14 @@ class Memory:   # stored as ( s, a, r, s_ )
         return len(self.samples) >= self.capacity
 
 #-------------------- AGENT ---------------------------
-MEMORY_CAPACITY = 100000
+MEMORY_CAPACITY = 10000
 BATCH_SIZE = 64
 
 GAMMA = 0.99
 
-MAX_EPSILON = 1
-MIN_EPSILON = 0.1
-LAMBDA = 0.001
+MAX_EPSILON = 0.50
+MIN_EPSILON = 0.01
+LAMBDA = 0.01
 
 UPDATE_TARGET_FREQUENCY = 1000
 
@@ -216,6 +216,7 @@ class Environment:
 
         print("Total reward:", R)
 
+
 #-------------------- MAIN ----------------------------
 if __name__ == "__main__":
 # Ensure we always get the same amount of randomness
@@ -223,13 +224,13 @@ if __name__ == "__main__":
     np.random.seed(404)
 
     PROBLEM = 'MagicSquare3x3-v0'
-    PROBLEM = 'MagicSquare5x5-v0'
-#    PROBLEM = 'MagicSquare10x10-v0'
     env = Environment(PROBLEM)
     env.env.seed(404)
 
     state_cnt  = env.env.observation_space.shape[0]
     action_cnt = env.env.action_space.n
+
+#    print "state_cnt", state_cnt, "action_cnt", action_cnt
 
     agent = Agent(state_cnt, action_cnt)
     randomAgent = RandomAgent(action_cnt)

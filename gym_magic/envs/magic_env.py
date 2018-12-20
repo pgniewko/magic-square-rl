@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 ... 
@@ -10,48 +9,41 @@ import math
 import gym
 import numpy as np
 from gym import spaces
+import ms as ms_lib
 
 
-class MagicSquareEnv(gym.Env):
+class MagicSquare3x3(gym.Env):
     """
     ...
     """
-    def __init__(self, DIM=3, seed=None):
-        self.M = DIM*(DIM*DIM+1)/2
-        self.rx_ = [0,0,0]
-        self.DIM = DIM
-        self.swaps = []
-
-        for i in range(self.DIM):
-            for j in range(self.DIM-1):
-                first_  = i*self.DIM+j
-                second_ = i*self.DIM+(j+1)
-                self.swaps.append( (first_,second_) )
-        
-        for i in range(self.DIM-1):
-            for j in range(self.DIM):
-                first_  = i*self.DIM + j
-                second_ = (i+1)*self.DIM + j
-                self.swaps.append( (first_,second_) )
-        
+    def __init__(self, seed=None):
+#        self.__version__ = "0.3"
+#        print("MagicSqaure3x3 - Version {}".format(self.__version__))
+        self.DIM = 3
+        self.M = self.DIM * (self.DIM * self.DIM+ 1 ) / 2
+        self.swaps = ms_lib.all_moves
 
         self.action_space = spaces.Discrete( len(self.swaps) )
-        self.observation_space = np.ones(self.DIM*self.DIM)
+        self.observation_space = np.ones(self.DIM * self.DIM)
         self.state = None
         self.is_square_solved=False
         self.curr_step = 0 
+        
+        ## EXTRAS
+        self.scramble = 1
+        self.success_counter = 0
+        self.experience_factor = 1000
    
         # Simulation related variables.
         self.seed(seed)
         self.reset()
-
+        
 
     def reset(self):
         self.curr_step = 0
-        self.rx_ = [0,0,0]
         self.is_square_solved=False
-        self.state = np.arange( 1, self.DIM*self.DIM+1, 1, dtype=int)
-        np.random.shuffle( self.state )
+        self.state = ms_lib.random_ms( self.scramble )
+       
         return self.state
 
 
@@ -64,12 +56,13 @@ class MagicSquareEnv(gym.Env):
 
         info_ = {}
         info_['steps'] = self.curr_step
-        info_['nrows'] = self.rx_[0]
-        info_['ncols'] = self.rx_[1]
-        info_['ndiag'] = self.rx_[2]
 
         if self.is_square_solved:
             self._print_ms()
+            self.success_counter += 1
+            if self.success_counter % self.experience_factor == 0:
+                self.scramble += 1
+                print "Scrambling level increased to ", self.scramble
 
         return new_state, reward, self.is_square_solved, info_
 
@@ -92,25 +85,12 @@ class MagicSquareEnv(gym.Env):
         arr_ = sums_ - self.M
         residues = np.sum( arr_**2 )
         
-        r1 = np.sum( (row_sums-self.M) == 0)
-        r2 = np.sum( (column_sums-self.M) == 0)
-        r3 = np.sum( (diagonal_sums-self.M) == 0)
-
-        previous = np.sum(self.rx_)
-        current  = np.sum([r1,r2,r3])
-        self.rx_ = [r1,r2,r3]
-
-#        if previous == current:
-#            reward = 0
-#        elif previous > current:
-#            reward = -1
-#        else:
-#            reward = 1
-#   
-        # NEW REWARD FUNCTION
-        reward = current - previous
         self.is_square_solved = residues == 0
-
+        if self.is_square_solved:
+            reward = 1
+        else:
+            reward = 0
+        
         return reward 
 
 
@@ -139,7 +119,7 @@ class MagicSquareEnv(gym.Env):
             ms_ext[i+1][self.DIM] = row_sums[i]
         
         for i in range(self.DIM):
-            ms_ext[self.DIM+1][i] = row_sums[i]
+            ms_ext[self.DIM+1][i] = column_sums[i]
 
         ms_ext[0][self.DIM] = diagonal_sums[1]
         ms_ext[self.DIM+1][self.DIM] = diagonal_sums[0]
@@ -161,13 +141,4 @@ class MagicSquareEnv(gym.Env):
     
     def close(self):
         return
-
-
-class MagicSquare3x3(MagicSquareEnv):
-    """
-    """
-    def __init__(self, seed_=None):
-        self.__version__ = "0.2"
-        print("MagicSqaure3x3 - Version {}".format(self.__version__))
-        super(MagicSquare3x3, self).__init__(DIM=3, seed=seed_)
 

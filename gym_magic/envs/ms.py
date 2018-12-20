@@ -12,22 +12,21 @@ all_3x3_magic_squares = [
             ]
 
 all_moves = [
-        (0,4),
-        (1,4),
-        (2,4),
-        (3,4),
-        (5,4),
-        (6,4),
-        (7,4),
-        (8,4),
-        ]
+            (0,4),
+            (1,4),
+            (2,4),
+            (3,4),
+            (5,4),
+            (6,4),
+            (7,4),
+            (8,4),
+            ]
 
 def random_ms(scramble=0):
 
     n = len(all_3x3_magic_squares)
     ix = np.random.randint(0, n)
-    ms = all_3x3_magic_squares[ix]
-    #print_ms(ms)
+    ms = np.array(all_3x3_magic_squares[ix]).copy()
 
     for i in range(scramble):
         n = len(all_moves)
