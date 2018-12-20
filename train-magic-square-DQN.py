@@ -14,6 +14,7 @@ import tensorflow as tf
 
 import gym
 import gym_magic
+import gym_magic.envs.magic_env as ms_
 
 #-------------------- BRAIN ---------------------------
 from keras.models import Sequential
@@ -214,8 +215,9 @@ class Environment:
             if done:
                 break
 
-        print("Total reward:", R)
-
+        print("Total reward:", R, " no. steps=", info['steps'])
+        
+        return info['level']
 
 #-------------------- MAIN ----------------------------
 if __name__ == "__main__":
@@ -229,8 +231,6 @@ if __name__ == "__main__":
 
     state_cnt  = env.env.observation_space.shape[0]
     action_cnt = env.env.action_space.n
-
-#    print "state_cnt", state_cnt, "action_cnt", action_cnt
 
     agent = Agent(state_cnt, action_cnt)
     randomAgent = RandomAgent(action_cnt)
@@ -250,7 +250,7 @@ if __name__ == "__main__":
 
         print("AGENT - MODEL TRAINING")
         while True:
-            env.run(agent)
-            agent.brain.model.save(dir_out+PROBLEM + "-dqn.h5")
+            dl = env.run(agent)
+            agent.brain.model.save(dir_out+PROBLEM + "-dqn.dl-%d.h5" % dl )
     finally:
-        agent.brain.model.save(dir_out+PROBLEM + "-dqn.h5")
+        agent.brain.model.save(dir_out+PROBLEM + "-dqn.dl-%d.h5" % dl )
